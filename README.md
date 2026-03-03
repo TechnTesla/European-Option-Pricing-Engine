@@ -254,7 +254,7 @@ This is implemented in `mc_delta()` by calling the Monte Carlo pricer at `S0 + h
 
 Monte Carlo Delta is still a Monte Carlo estimator, so its sampling error decreases at the same theoretical rate:
 
-![rate](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\text{Error}\propto O(N^{-1/2}))
+![rate](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{Error}\propto%20O(N^{-1/2}))
 
 ### Results (what the plot shows)
 - The MC Delta estimate moves closer to the Black–Scholes Delta as `N` increases.
