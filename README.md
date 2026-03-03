@@ -200,3 +200,26 @@ Implementation details:
 - Uses both `Z` and `-Z` to create two terminal price arrays
 - Averages paired payoffs, discounts by `exp(-rT)`, and returns `(price, std_error, confidence_interval)`
 - Same compute budget as standard MC (one pair uses two terminal prices, but replaces two independent draws with a correlated pair)
+
+## Convergence Plot (MC → Black–Scholes)
+
+![convergence](results/plots/convergence.png)
+
+Monte Carlo pricing is an estimator, so its error decreases as the number of simulations `N` increases. In theory, the convergence rate is:
+
+![rate](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\text{Error}\propto O(N^{-1/2}))
+
+### What’s plotted
+- **MC_Baseline**: absolute error `|MC_price − BS_price|`
+- **Antithetic Variates**: absolute error `|AV_price − BS_price|`
+- **Reference line**: a dashed curve proportional to \(N^{-1/2}\)
+
+We use a **log–log plot** because power laws become straight lines; if error behaves like \(N^{-1/2}\), the curve should be roughly parallel to the reference line.
+
+### How we reduce noise in the plot
+For each `N`, we run multiple seeds (`seed = run` for `run in range(N_RUNS)`) and average the absolute error. This “nested loop over seeds” doesn’t change the estimator; it just makes the convergence trend clearer and less dependent on one lucky/unlucky random draw.
+
+### Results (what the plot shows)
+- **Both methods follow the expected \(N^{-1/2}\) slope** (they track the reference line), which empirically validates the theoretical Monte Carlo convergence rate.
+- **Antithetic variates sits below baseline MC** across `N`: it reduces variance, so you get **lower error for the same simulation budget** (same order of convergence, improved constant factor).
+- As `N` grows large, both errors shrink predictably, but antithetic remains consistently better due to the negative-correlation pairing \(Z\) and \(-Z\).
