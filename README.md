@@ -7,7 +7,6 @@ in quantitative finance — one that sits at the intersection of probability the
 stochastic calculus, and numerical methods.
 
 ---
----
 > This is my first quantitative finance project, built from scratch with no prior Python or finance experience.
 
 ## Overview
