@@ -53,7 +53,16 @@ European-Option-Pricing-Engine/
 
 ## Key Results
 
-Running with parameters S₀=100, K=100, r=0.05, σ=0.20, T=1.0, q=0.0:
+# Default Parameters
+
+| Parameter | Symbol | Value | Description |
+|-----------|--------|-------|-------------|
+| Spot price | S₀ | 100 | Current stock price |
+| Strike price | K | 100 | At-the-money |
+| Risk-free rate | r | 0.05 | 5% annual |
+| Dividend yield | q | 0.00 | No dividends |
+| Volatility | σ | 0.20 | 20% implied vol |
+| Maturity | T | 1.0 | 1 year |
 
 | Method | Price | Std Error | 95% CI |
 |--------|-------|-----------|--------|
