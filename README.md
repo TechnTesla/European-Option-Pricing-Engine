@@ -103,3 +103,51 @@ Call–put parity links calls and puts through the same discounted components. F
 ![parity](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}C-P=S_0e^{-qT}-Ke^{-rT})
 
 > Note: equations are forced to white (`\color{White}`), so they are best viewed in dark mode.
+
+## Monte Carlo Simulation Pricer
+
+Black–Scholes gives a closed-form benchmark price, but we also implement a **Monte Carlo (MC)** pricer as a numerical alternative. The idea is simple: simulate many possible terminal stock prices under the **risk-neutral GBM** model, compute the option payoff for each simulated path, then **discount the average payoff** back to today.
+
+### Risk-neutral GBM (terminal price)
+Under risk-neutral pricing the stock drift becomes `r - q`, and the terminal price has the closed-form simulation form:
+
+![ST](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}S_T=S_0\exp\Big((r-q-\tfrac12\sigma^2)T+\sigma\sqrt{T}Z\Big),\;\;Z\sim\mathcal{N}(0,1))
+
+This lets us simulate `S_T` directly (one random draw per simulation), rather than stepping through time.
+
+### Payoffs and discounting
+For each simulated terminal price `S_T`, we compute the payoff:
+
+- Call payoff: `max(S_T - K, 0)`
+- Put payoff:  `max(K - S_T, 0)`
+
+The MC price is the discounted average payoff:
+
+![mcprice](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\hat{V}_0=e^{-rT}\cdot\frac{1}{N}\sum_{i=1}^{N}\text{payoff}(S_T^{(i)}))
+
+Discounting by `e^{-rT}` accounts for the **time value of money**: payoffs occur at expiry, so we convert them to present value using the risk-free rate.
+
+### Estimator uncertainty (standard error + 95% CI)
+Because MC is an estimator, it has sampling error. We report:
+
+- **Standard error** (how much the estimate varies due to finite `N`)
+- **95% confidence interval** using the normal approximation
+
+![se](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\text{SE}=\frac{s}{\sqrt{N}},\quad\text{CI}_{95\%}=\hat{V}_0\pm1.96\cdot\text{SE})
+
+where `s` is the sample standard deviation of the (discounted) payoff samples (we use `ddof=1`).
+
+### Function inputs
+`monte_carlo(S0, K, r, q, sigma, T, N, option_type, seed=1)`
+
+- `S0`: current spot price  
+- `K`: strike price  
+- `r`: risk-free rate (discounting)  
+- `q`: dividend yield (risk-neutral drift adjustment)  
+- `sigma`: implied volatility  
+- `T`: time to maturity (years)  
+- `N`: number of simulations  
+- `option_type`: `'call'` or `'put'`  
+- `seed`: RNG seed (for reproducibility)
+
+This function returns `(price, std_error, confidence_interval)`.
