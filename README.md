@@ -7,6 +7,8 @@ in quantitative finance — one that sits at the intersection of probability the
 stochastic calculus, and numerical methods.
 
 ---
+---
+> This is my first quantitative finance project, built from scratch with no prior Python or finance experience.
 
 ## Overview
 
@@ -18,9 +20,6 @@ This project builds a complete European option pricing engine from first princip
 - **Antithetic variates** for variance reduction — achieving lower error at the same computational cost
 - **Option Greeks** computed analytically (BS) and numerically (finite differences on MC)
 - **3D pricing surface** visualising call and put prices across all strikes and maturities
-
----
-> This is my first quantitative finance project, built from scratch with no prior Python or finance experience.
 
 ## Project Structure
 ```
