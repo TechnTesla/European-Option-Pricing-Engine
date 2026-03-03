@@ -185,12 +185,12 @@ where \(\rho\) is the correlation between the paired payoffs. For antithetic var
 ### Variance Reduction Factor (VRF)
 We report the **variance reduction factor** as:
 
-![vrf](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{VRF}=\frac{\mathrm{Var}(\text{standard MC estimator})}{\mathrm{Var}(\text{antithetic estimator})})
+![vrf](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{VRF}=\frac{\mathrm{Var}(\mathrm{standard}\%20\mathrm{MC}\%20\mathrm{estimator})}{\mathrm{Var}(\mathrm{antithetic}\%20\mathrm{estimator})})
 
 Interpretation:
 - `VRF > 1` means antithetic variates reduced variance (good).
 - `VRF = 2` means you achieved the same accuracy with **half** the variance (or equivalently need about half as many simulations for the same error).
-- A 33% lower standard error corresponds to about \((1/0.67)^2 \approx 2.2\)× variance reduction (rule of thumb: variance scales like SE²).
+- A 33% lower standard error corresponds to about `(1/0.67)^2 ≈ 2.2×` variance reduction (rule of thumb: variance scales like SE²).
 
 ### Function inputs / behaviour
 `var_reduction(S0, K, r, q, sigma, T, N, option_type, seed=1)`
@@ -207,19 +207,19 @@ Implementation details:
 
 Monte Carlo pricing is an estimator, so its error decreases as the number of simulations `N` increases. In theory, the convergence rate is:
 
-![rate](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\text{Error}\propto O(N^{-1/2}))
+![rate](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{Error}\propto%20O(N^{-1/2}))
 
 ### What’s plotted
 - **MC_Baseline**: absolute error `|MC_price − BS_price|`
 - **Antithetic Variates**: absolute error `|AV_price − BS_price|`
-- **Reference line**: a dashed curve proportional to \(N^{-1/2}\)
+- **Reference line**: a dashed curve proportional to `N^(-1/2)`
 
-We use a **log–log plot** because power laws become straight lines; if error behaves like \(N^{-1/2}\), the curve should be roughly parallel to the reference line.
+We use a **log–log plot** because power laws become straight lines; if error behaves like `N^(-1/2)`, the curve should be roughly parallel to the reference line.
 
 ### How we reduce noise in the plot
 For each `N`, we run multiple seeds (`seed = run` for `run in range(N_RUNS)`) and average the absolute error. This “nested loop over seeds” doesn’t change the estimator; it just makes the convergence trend clearer and less dependent on one lucky/unlucky random draw.
 
 ### Results (what the plot shows)
-- **Both methods follow the expected \(N^{-1/2}\) slope** (they track the reference line), which empirically validates the theoretical Monte Carlo convergence rate.
+- **Both methods follow the expected `N^(-1/2)` slope** (they track the reference line), which empirically validates the theoretical Monte Carlo convergence rate.
 - **Antithetic variates sits below baseline MC** across `N`: it reduces variance, so you get **lower error for the same simulation budget** (same order of convergence, improved constant factor).
-- As `N` grows large, both errors shrink predictably, but antithetic remains consistently better due to the negative-correlation pairing \(Z\) and \(-Z\).
+- As `N` grows large, both errors shrink predictably, but antithetic remains consistently better due to the negative-correlation pairing `Z` and `-Z`.
