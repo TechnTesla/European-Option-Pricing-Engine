@@ -19,6 +19,25 @@ This project builds a complete European option pricing engine from first princip
 - **Option Greeks** computed analytically (BS) and numerically (finite differences on MC)
 - **3D pricing surface** visualising call and put prices across all strikes and maturities
 
+## Project Structure
+```
+European-Option-Pricing-Engine/
+├── src/
+│   ├── black_scholes.py       # Analytical BS pricer
+│   ├── monte_carlo.py         # MC simulation pricer
+│   ├── variance_reduction.py  # Antithetic variates implementation
+│   └── greeks.py              # BS analytical Greeks and MC delta
+├── results/
+│   └── plots/
+│       ├── convergence.png    # MC vs BS price convergence
+│       ├── delta.png          # MC vs BS delta convergence
+│       └── options_surface.png # 3D pricing surface
+├── main.py                    # Entry point — runs all pricing and plots
+├── requirements.txt           # Dependencies
+└── README.md
+```
+
+
 ### What This Project Demonstrates
 | Component | Method | Key Result |
 |-----------|--------|------------|
@@ -46,6 +65,8 @@ Running with parameters S₀=100, K=100, r=0.05, σ=0.20, T=1.0, q=0.0:
 | Vega | 37.5240 | — | — |
 | Theta | -6.4140 | — | — |
 | Rho | 53.2325 | — | — |
+
+
 
 ---
 
