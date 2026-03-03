@@ -8,7 +8,7 @@ stochastic calculus, and numerical methods.
 
 ---
 > This is my first quantitative finance project, built from scratch with no prior Python or finance experience.
-
+---
 ## Overview
 
 This project builds a complete European option pricing engine from first principles, implementing and validating multiple pricing methodologies:
