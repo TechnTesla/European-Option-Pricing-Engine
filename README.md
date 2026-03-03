@@ -151,3 +151,52 @@ where `s` is the sample standard deviation of the (discounted) payoff samples (w
 - `seed`: RNG seed (for reproducibility)
 
 This function returns `(price, std_error, confidence_interval)`.
+
+## Variance Reduction: Antithetic Variates
+
+Plain Monte Carlo uses independent random draws \(Z \sim \mathcal{N}(0,1)\) to simulate terminal prices \(S_T\). The estimate is unbiased, but it can have high variance. **Antithetic variates** reduce this variance by pairing each random draw \(Z\) with its mirror \(-Z\), then averaging the two resulting payoffs.
+
+### Idea (what it is)
+For each simulation we generate a normal shock \(Z\) and compute two terminal prices:
+
+![STpm](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}S_T^{(+)}=S_0\exp\Big((r-q-\tfrac12\sigma^2)T+\sigma\sqrt{T}\,Z\Big),\quad
+S_T^{(-)}=S_0\exp\Big((r-q-\tfrac12\sigma^2)T-\sigma\sqrt{T}\,Z\Big))
+
+We then compute the corresponding payoffs and **average them**:
+
+- Call: \(\;\frac{1}{2}\big(\max(S_T^{(+)}-K,0)+\max(S_T^{(-)}-K,0)\big)\)
+- Put:  \(\;\frac{1}{2}\big(\max(K-S_T^{(+)},0)+\max(K-S_T^{(-)},0)\big)\)
+
+This keeps the estimator **unbiased**, but typically lowers its variance.
+
+### Why variance goes down
+The key is **negative correlation**: when \(Z\) is large and positive, \(-Z\) is equally large and negative. For vanilla calls/puts, the payoff from \(Z\) tends to be high when the payoff from \(-Z\) tends to be low, so averaging them cancels some randomness.
+
+Mathematically, for the averaged payoff \(\bar{Y}=\frac{Y^{(+)}+Y^{(-)}}{2}\),
+
+![varavg](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{Var}(\bar{Y})=\frac{1}{4}\Big(\mathrm{Var}(Y^{(+)})+\mathrm{Var}(Y^{(-)})+2\,\mathrm{Cov}(Y^{(+)},Y^{(-)})\Big))
+
+Since \(Y^{(+)}\) and \(Y^{(-)}\) have the same variance, this simplifies to:
+
+![varavg2](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{Var}(\bar{Y})=\frac{1}{2}\mathrm{Var}(Y)\big(1+\rho\big))
+
+where \(\rho\) is the correlation between the paired payoffs. For antithetic variates we often get \(\rho < 0\), which makes \(1+\rho\) smaller, hence lower variance.
+
+### Variance Reduction Factor (VRF)
+We report the **variance reduction factor** as:
+
+![vrf](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{VRF}=\frac{\mathrm{Var}(\text{standard MC estimator})}{\mathrm{Var}(\text{antithetic estimator})})
+
+Interpretation:
+- `VRF > 1` means antithetic variates reduced variance (good).
+- `VRF = 2` means you achieved the same accuracy with **half** the variance (or equivalently need about half as many simulations for the same error).
+- A 33% lower standard error corresponds to about \((1/0.67)^2 \approx 2.2\)× variance reduction (rule of thumb: variance scales like SE²).
+
+### Function inputs / behaviour
+`var_reduction(S0, K, r, q, sigma, T, N, option_type, seed=1)`
+
+Implementation details:
+- Generates `N//2` normal draws `Z`
+- Uses both `Z` and `-Z` to create two terminal price arrays
+- Averages paired payoffs, discounts by `exp(-rT)`, and returns `(price, std_error, confidence_interval)`
+- Same compute budget as standard MC (one pair uses two terminal prices, but replaces two independent draws with a correlated pair)
