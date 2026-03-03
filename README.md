@@ -74,7 +74,7 @@ Running with parameters S₀=100, K=100, r=0.05, σ=0.20, T=1.0, q=0.0:
 
 We use the **Black–Scholes formula** as the benchmark “true” price for a European option because it is an **analytical (closed-form)** solution: it returns the fair value directly (no simulation noise). Starting from the same **GBM** stock model and applying **Itô’s Lemma**, the Black–Scholes price follows from **risk-neutral pricing** (no-arbitrage).
 
-Under risk-neutral pricing, we replace the real-world drift with \( r-q \). This prevents arbitrage by ensuring that (after hedging away risk in the derivation) any locally risk-free position grows at the **risk-free rate** \( r \). That’s why option values are **discounted** at \( r \): future payoffs are priced as present values.
+Under risk-neutral pricing, we replace the real-world drift with **r − q**. This prevents arbitrage by ensuring that (after hedging away risk in the derivation) any locally risk-free position grows at the **risk-free rate r**. That’s why option values are **discounted** at r: future payoffs are priced as present values.
 
 ### Risk-neutral GBM
 ![risk-neutral-gbm](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}dS_t=(r-q)S_t\,dt+\sigma%20S_t\,dW_t)
@@ -98,9 +98,8 @@ Under risk-neutral pricing, we replace the real-world drift with \( r-q \). This
 ![put](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}P=Ke^{-rT}N(-d_2)-S_0e^{-qT}N(-d_1))
 
 ### Validation: call–put parity (no-arbitrage check)
-Call–put parity links calls and puts through the same discounted components. For the same \((S_0,K,r,q,\sigma,T)\), the prices must satisfy:
+Call–put parity links calls and puts through the same discounted components. For the same input parameters **(S0, K, r, q, sigma, T)**, the prices must satisfy:
 
 ![parity](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}C-P=S_0e^{-qT}-Ke^{-rT})
 
-
-> Note: Read it in dark mode as I forced the equations to be white
+> Note: equations are forced to white (`\color{White}`), so they are best viewed in dark mode.
