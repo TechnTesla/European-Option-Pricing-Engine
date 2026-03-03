@@ -212,11 +212,22 @@ We use a **log–log plot** because power laws become straight lines; if error b
 ### How we reduce noise in the plot
 For each `N`, we run multiple seeds (`seed = run` for `run in range(N_RUNS)`) and average the absolute error. This “nested loop over seeds” doesn’t change the estimator; it just makes the convergence trend clearer and less dependent on one lucky/unlucky random draw.
 
-### Results (what the plot shows)
-- **Both methods follow the expected `N^(-1/2)` slope** (they track the reference line), which empirically validates the theoretical Monte Carlo convergence rate.
-- **Antithetic variates sits below baseline MC** across `N`: it reduces variance, so you get **lower error for the same simulation budget** (same order of convergence, improved constant factor).
-- As `N` grows large, both errors shrink predictably, but antithetic remains consistently better due to the negative-correlation pairing `Z` and `-Z`.
 
+### Results (interpretation of the convergence diagram)
+
+- In the log–log diagram above, both the **MC_Baseline** (blue) and **Antithetic Variates** (orange) curves appear approximately linear and run parallel to the dashed `N^(-1/2)` reference. This confirms the estimator’s error decays at the theoretical Monte Carlo rate `O(N^(-1/2))`.
+
+- The dashed green line represents slope only (not magnitude). The vertical gap between the curves and the reference reflects the variance constant in  
+  `Error ≈ C / sqrt(N)`.
+
+- The orange antithetic curve lies consistently below the blue baseline curve while remaining parallel. This shows that variance reduction does **not** change the convergence order, but lowers the multiplicative constant `C`, producing smaller error for the same simulation budget.
+
+- As `N` increases from 10^2 to 10^6, both curves become smoother and the slope stabilises, indicating entry into the asymptotic regime where sampling noise behaves predictably.
+
+Overall, the diagram demonstrates that:
+1. Monte Carlo pricing converges to Black–Scholes at the correct theoretical rate.
+2. Antithetic variates reduces variance without altering convergence order.
+3. The implementation behaves exactly as a correctly constructed Monte Carlo estimator should.
 ## Greeks (Risk Sensitivities)
 
 In options, **Greeks** are the standard way to quantify **risk**: they measure how sensitive an option’s price is to small changes in key inputs. In this project we compute Greeks two ways:
