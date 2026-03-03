@@ -70,84 +70,38 @@ Running with parameters S₀=100, K=100, r=0.05, σ=0.20, T=1.0, q=0.0:
 | Rho | 53.2325 | — | — |
 
 
+## Black–Scholes (Analytical) Pricer
 
-## Black–Scholes (Analytical) Pricer — Math Behind the Formula
+We use the **Black–Scholes formula** as the benchmark “true” price for a European option because it is an **analytical (closed-form)** solution: it returns the fair value directly (no simulation noise). Starting from the same **GBM** stock model and applying **Itô’s Lemma**, the Black–Scholes price follows from **risk-neutral pricing** (no-arbitrage).
 
-This project includes a **closed-form** Black–Scholes calculator for European calls and puts. The formula is derived from:
+Under risk-neutral pricing, we replace the real-world drift \( \mu \) with \( r-q \). This prevents arbitrage by ensuring that (after hedging away risk in the derivation) any locally risk-free position grows at the **risk-free rate** \( r \). That’s why option values are **discounted** at \( r \): future payoffs are priced as present values.
 
-1) **GBM** for the underlying  
-2) **Itô’s Lemma** to obtain option dynamics  
-3) **No-arbitrage / delta-hedging** to remove risk  
-4) The resulting **Black–Scholes PDE**, solved in closed form  
-5) **Call–put parity** as a verification check  
+### Risk-neutral GBM
+![risk-neutral-gbm](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}dS_t=(r-q)S_t\,dt+\sigma%20S_t\,dW_t)
 
----
+### Inputs (what the function takes)
+`black_scholes(S0, K, r, q, sigma, T, option_type)`
 
-### 1) Stock model (GBM)
+- `S0`: current spot price  
+- `K`: strike price  
+- `r`: risk-free rate (used for discounting)  
+- `q`: continuous dividend yield  
+- `sigma`: implied volatility  
+- `T`: time to maturity (years)  
+- `option_type`: `'call'` or `'put'`  
 
-![GBM](https://latex.codecogs.com/svg.latex?\dpi{120}dS_t=\mu%20S_t\,dt+\sigma%20S_t\,dW_t)
+### Closed-form Black–Scholes solution
+![d1d2](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}d_1=\frac{\ln(S_0/K)+(r-q+\tfrac12\sigma^2)T}{\sigma\sqrt{T}},\quad%20d_2=d_1-\sigma\sqrt{T})
 
-Where:
-- `S_t` is the stock price
-- `μ` is drift (real-world)
-- `σ` is volatility
-- `W_t` is Brownian motion
+![call](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}C=S_0e^{-qT}N(d_1)-Ke^{-rT}N(d_2))
 
----
+![put](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}P=Ke^{-rT}N(-d_2)-S_0e^{-qT}N(-d_1))
 
-### 2) Itô’s Lemma (option dynamics)
+### Validation: call–put parity (no-arbitrage check)
+Call–put parity links calls and puts through the same discounted components. For the same \((S_0,K,r,q,\sigma,T)\), the prices must satisfy:
 
-Let the option value be `V(S,t)`. Applying Itô’s Lemma:
+![parity](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}C-P=S_0e^{-qT}-Ke^{-rT})
 
-![Ito](https://latex.codecogs.com/svg.latex?\dpi{120}dV=\Big(\frac{\partial%20V}{\partial%20t}+\mu%20S\frac{\partial%20V}{\partial%20S}+\frac{1}{2}\sigma^2S^2\frac{\partial^2%20V}{\partial%20S^2}\Big)\,dt+\sigma%20S\frac{\partial%20V}{\partial%20S}\,dW)
+If the computed call and put violate parity beyond a small tolerance, it indicates an implementation error.
 
-This splits `dV` into a deterministic `dt` part and a random `dW` part.
-
----
-
-### 3) Delta-hedging + no-arbitrage ⇒ Black–Scholes PDE
-
-Choose the hedge ratio:
-
-![Delta](https://latex.codecogs.com/svg.latex?\dpi{120}\Delta=\frac{\partial%20V}{\partial%20S})
-
-Form a hedged portfolio `Π = V − ΔS` to cancel the `dW` term.  
-A riskless portfolio must earn the risk-free rate `r`. With continuous dividend yield `q`, no-arbitrage implies the **Black–Scholes PDE**:
-
-![PDE](https://latex.codecogs.com/svg.latex?\dpi{120}\frac{\partial%20V}{\partial%20t}+(r-q)S\frac{\partial%20V}{\partial%20S}+\frac{1}{2}\sigma^2S^2\frac{\partial^2%20V}{\partial%20S^2}-rV=0)
-
-Expiry boundary conditions:
-- Call: `V(S,T) = max(S − K, 0)`
-- Put:  `V(S,T) = max(K − S, 0)`
-
----
-
-### 4) Closed-form Black–Scholes solution
-
-Define:
-
-![d1](https://latex.codecogs.com/svg.latex?\dpi{120}d_1=\frac{\ln(S_0/K)+(r-q+\frac{1}{2}\sigma^2)T}{\sigma\sqrt{T}})
-  
-![d2](https://latex.codecogs.com/svg.latex?\dpi{120}d_2=d_1-\sigma\sqrt{T})
-
-Let `N(.)` be the standard normal CDF.
-
-Call:
-
-![Call](https://latex.codecogs.com/svg.latex?\dpi{120}C=S_0e^{-qT}N(d_1)-Ke^{-rT}N(d_2))
-
-Put:
-
-![Put](https://latex.codecogs.com/svg.latex?\dpi{120}P=Ke^{-rT}N(-d_2)-S_0e^{-qT}N(-d_1))
-
-This is what `black_scholes.py` implements.
-
----
-
-### 5) Verification via call–put parity
-
-For European options:
-
-![Parity](https://latex.codecogs.com/svg.latex?\dpi{120}C-P=S_0e^{-qT}-Ke^{-rT})
-
-Parity is a quick check that the call and put implementations are internally consistent for the same inputs.
+> Note: the equations are forced to white (`\color{White}`) for dark themes. If you view the README in light mode, you may want to remove `\color{White}` from the image URLs.
