@@ -64,6 +64,7 @@ European-Option-Pricing-Engine/
 | Volatility | σ | 0.20 | 20% implied vol |
 | Maturity | T | 1.0 | 1 year |
 
+### Results
 | Method | Price | Std Error | 95% CI |
 |--------|-------|-----------|--------|
 | Black-Scholes (Analytical) | 10.4506 | — | — |
