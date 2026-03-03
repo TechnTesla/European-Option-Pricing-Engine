@@ -267,11 +267,21 @@ Monte Carlo Delta is still a Monte Carlo estimator, so its sampling error decrea
 
 ![rate](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{Error}\propto%20O(N^{-1/2}))
 
-### Results (what the plot shows)
-- The MC Delta estimate moves closer to the Black–Scholes Delta as `N` increases.
-- The slope on the log–log plot is consistent with `N^(-1/2)`, empirically confirming the expected Monte Carlo convergence behaviour.
-- This provides an additional validation layer beyond pricing: not only do MC prices converge to Black–Scholes, the **risk sensitivity (Delta)** converges as well.
+### Results (interpretation of the Delta convergence diagram)
 
+- In the log–log diagram above, the **MC_DELTA** curve (blue) is approximately linear and runs parallel to the dashed `N^(-1/2)` reference. This confirms that the Monte Carlo Delta estimator converges at the same theoretical rate `O(N^(-1/2))` as the price estimator.
+
+- The dashed orange line represents slope only. The vertical separation between the MC_DELTA curve and the reference reflects the variance constant in  
+  `Error ≈ C / sqrt(N)`.
+
+- As `N` increases from 10^2 to 10^6, the error decreases smoothly and predictably. The straight-line behaviour on the log–log scale indicates we are in the asymptotic regime where sampling error dominates.
+
+- Importantly, this validates more than pricing accuracy: it shows that **risk sensitivity (Delta)** computed via finite differences on Monte Carlo prices converges correctly to the analytical Black–Scholes Delta.
+
+Overall, the diagram demonstrates that:
+1. Monte Carlo not only converges in price, but also in risk.
+2. The finite-difference Delta estimator inherits the same `N^(-1/2)` convergence behaviour.
+3. The implementation is numerically stable and consistent with Monte Carlo theory.
 ## 3D Option Pricing Surface (Geometric View of Black–Scholes)
 
 ![options-surface](results/plots/options_surface.png)
