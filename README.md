@@ -282,12 +282,12 @@ Overall, the diagram demonstrates that:
 1. Monte Carlo not only converges in price, but also in risk.
 2. The finite-difference Delta estimator inherits the same `N^(-1/2)` convergence behaviour.
 3. The implementation is numerically stable and consistent with Monte Carlo theory.
-## 3D Option Pricing Surface (Geometric View of Black–Scholes)
+
+## Option Pricing Surface (Geometric View of Black–Scholes)
 
 ![options-surface](results/plots/options_surface.png)
 
-To go beyond single-point pricing, we visualise the **entire Black–Scholes pricing landscape** across a grid of strikes and maturities. Using the same closed-form pricer from earlier sections, we compute:
-
+To go beyond single-point pricing, we visualise the full Black–Scholes pricing landscape across a grid of strikes and maturities. Using the same closed-form pricer from earlier sections, we compute:
 - 50 strike values from `K = 60` to `K = 140`
 - 50 maturities from `T = 0.1` to `T = 2.0` years
 
@@ -295,27 +295,30 @@ This produces two 3D surfaces:
 - **Call surface:** `C(K, T)`
 - **Put surface:** `P(K, T)`
 
-### Why this matters (link to the earlier work)
-Everything in this plot comes directly from the same Black–Scholes model we used as the benchmark for:
+### Why this matters (link to earlier work)
+This surface is generated from the same Black–Scholes benchmark model used for:
 - Monte Carlo price convergence (`MC → BS`)
 - Antithetic variance reduction
 - Delta convergence (`MC Delta → BS Delta`)
 
-The surface makes the pricing function intuitive: you can *see* how option value changes as you move through market conditions (different strikes and time to expiry), rather than checking one parameter set at a time.
+Instead of validating at one parameter set, the surface lets you *see* how price changes across market conditions (moneyness and time).
 
-### What you should observe
-- **Calls decrease as strike increases** (harder to finish in-the-money).
-- **Puts increase as strike increases** (more protection value).
-- **Both calls and puts generally increase with maturity** (more time for the stock to move into a favourable region).
-- Far in/out-of-the-money regions flatten toward intrinsic-value-like behaviour.
+### What the diagram shows
+From the plotted surfaces:
+- **Call prices decrease as `K` increases** (harder to finish in-the-money).
+- **Put prices increase as `K` increases** (more downside protection value).
+- **Both surfaces generally rise with `T`** (more time for favourable moves).
+- In deep ITM/OTM regions the surfaces flatten toward intrinsic-value-like behaviour.
 
 ### Geometric interpretation of call–put parity
-Call–put parity is the no-arbitrage identity we used to verify our Black–Scholes implementation:
+Call–put parity is the no-arbitrage identity used earlier to verify the Black–Scholes implementation:
 
 ![parity](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}C-P=S_0e^{-qT}-Ke^{-rT})
 
-Geometrically, this says the **vertical gap** between the call surface and put surface at the same `(K, T)` is *not arbitrary* — it is pinned down by the discounted stock and discounted strike terms. In other words, for every point on the grid:
+Geometrically, parity says the **vertical gap** between the call surface and put surface at the same `(K, T)` is *not arbitrary*. For every grid point, `C(K,T) - P(K,T)` must equal the deterministic value set by:
+- the dividend-adjusted stock term `S0 * exp(-qT)`, and
+- the discounted strike term `K * exp(-rT)`.
 
-- If you subtract the put surface from the call surface, the result must match a deterministic surface driven by `S0`, `r`, `q`, `K`, and `T`.
-- This is why parity is such a strong correctness check: it constrains the relationship between the two surfaces everywhere, not just at a single input.
+So parity is more than a single-number check: it constrains the relationship between the two surfaces **everywhere** on the grid.
 
+> Note: the parity equation is forced to white (`\color{White}`), so it is best viewed in dark mode.
