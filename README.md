@@ -53,7 +53,7 @@ European-Option-Pricing-Engine/
 
 ## Key Results
 
-# Default Parameters
+### Default Parameters
 
 | Parameter | Symbol | Value | Description |
 |-----------|--------|-------|-------------|
