@@ -356,7 +356,7 @@ Because Black–Scholes is the benchmark throughout, the project inherits the ke
   **Meaning:** the theory assumes no transaction costs and continuous hedging is possible.  
   **Why it matters:** real hedging is discrete and costly; with jumps and costs, “perfect replication” breaks, so the model is an approximation.
 
-### Product scope limitations
+### Limitations
 - **European options only:** no early exercise logic (so not directly applicable to American options).
 - **Not calibrated to market data:** the 3D surface is the Black–Scholes surface over `(K, T)` at fixed `(S0, r, q, sigma)`, not a market-implied volatility surface.
 
