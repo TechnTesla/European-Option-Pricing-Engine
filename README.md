@@ -216,3 +216,47 @@ For each `N`, we run multiple seeds (`seed = run` for `run in range(N_RUNS)`) an
 - **Both methods follow the expected `N^(-1/2)` slope** (they track the reference line), which empirically validates the theoretical Monte Carlo convergence rate.
 - **Antithetic variates sits below baseline MC** across `N`: it reduces variance, so you get **lower error for the same simulation budget** (same order of convergence, improved constant factor).
 - As `N` grows large, both errors shrink predictably, but antithetic remains consistently better due to the negative-correlation pairing `Z` and `-Z`.
+
+## Greeks (Risk Sensitivities)
+
+In options, **Greeks** are the standard way to quantify **risk**: they measure how sensitive an option’s price is to small changes in key inputs. In this project we compute Greeks two ways:
+- **Analytically (Black–Scholes)** as the benchmark “true” sensitivities.
+- **Numerically (Monte Carlo)** by estimating **Delta** with finite differences, then checking it converges to the Black–Scholes Delta.
+
+You don’t need to know every derivation in depth to use them — the key idea is that each Greek corresponds to a different type of risk exposure.
+
+### What each Greek measures (brief)
+- **Delta (Δ)**: exposure to spot price moves (`S0`). “How much does the option price move if the stock moves $1?”
+- **Gamma (Γ)**: how fast Delta changes as spot moves. High Gamma = Delta shifts quickly (nonlinear risk).
+- **Vega (ν)**: exposure to volatility changes (`sigma`). “How much does the option price change if implied vol changes?”
+- **Theta (Θ)**: time decay. “How much value is lost as expiry approaches, holding everything else fixed?”
+- **Rho (ρ)**: exposure to interest rate changes (`r`) via discounting.
+
+### Black–Scholes Greeks (analytical benchmark)
+We compute the Greeks in `bs_greeks()` using the closed-form Black–Scholes expressions. These serve as the ground-truth risk sensitivities for validation.
+
+### Monte Carlo Delta (finite-difference estimate)
+We estimate Delta numerically by “bumping” the spot price up and down by a small amount `h` and applying a central difference:
+
+![mcdelta](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\hat{\Delta}=\frac{\hat{V}(S_0+h)-\hat{V}(S_0-h)}{2h})
+
+This is implemented in `mc_delta()` by calling the Monte Carlo pricer at `S0 + h` and `S0 - h`.
+
+---
+
+## Delta Convergence (MC Delta → BS Delta)
+
+![delta](results/plots/delta.png)
+
+### What’s plotted
+- **Absolute error** between Monte Carlo Delta and Black–Scholes Delta as `N` increases.
+- We use a **log–log scale** to make the theoretical Monte Carlo rate visible.
+
+Monte Carlo Delta is still a Monte Carlo estimator, so its sampling error decreases at the same theoretical rate:
+
+![rate](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\text{Error}\propto O(N^{-1/2}))
+
+### Results (what the plot shows)
+- The MC Delta estimate moves closer to the Black–Scholes Delta as `N` increases.
+- The slope on the log–log plot is consistent with `N^(-1/2)`, empirically confirming the expected Monte Carlo convergence behaviour.
+- This provides an additional validation layer beyond pricing: not only do MC prices converge to Black–Scholes, the **risk sensitivity (Delta)** converges as well.
