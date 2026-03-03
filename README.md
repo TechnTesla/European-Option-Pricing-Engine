@@ -159,8 +159,9 @@ Standard Monte Carlo uses independent random draws `Z ~ N(0,1)` to simulate term
 ### Idea (what it is)
 For each pair, we simulate two terminal prices using `Z` and `-Z`:
 
-![STpm](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}S_T^{(+)}=S_0\exp\Big((r-q-\tfrac12\sigma^2)T+\sigma\sqrt{T}\,Z\Big),\quad
-S_T^{(-)}=S_0\exp\Big((r-q-\tfrac12\sigma^2)T-\sigma\sqrt{T}\,Z\Big))
+![ST_pos](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}S_T^{(+)}=S_0\exp\Big((r-q-\tfrac12\sigma^2)T+\sigma\sqrt{T}\,Z\Big))
+
+![ST_neg](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}S_T^{(-)}=S_0\exp\Big((r-q-\tfrac12\sigma^2)T-\sigma\sqrt{T}\,Z\Big))
 
 We compute the two payoffs and then take their average:
 - Call: `0.5 * (max(ST_pos - K, 0) + max(ST_neg - K, 0))`
