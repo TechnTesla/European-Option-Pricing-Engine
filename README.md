@@ -260,3 +260,41 @@ Monte Carlo Delta is still a Monte Carlo estimator, so its sampling error decrea
 - The MC Delta estimate moves closer to the Black–Scholes Delta as `N` increases.
 - The slope on the log–log plot is consistent with `N^(-1/2)`, empirically confirming the expected Monte Carlo convergence behaviour.
 - This provides an additional validation layer beyond pricing: not only do MC prices converge to Black–Scholes, the **risk sensitivity (Delta)** converges as well.
+
+## 3D Option Pricing Surface (Geometric View of Black–Scholes)
+
+![options-surface](results/plots/options_surface.png)
+
+To go beyond single-point pricing, we visualise the **entire Black–Scholes pricing landscape** across a grid of strikes and maturities. Using the same closed-form pricer from earlier sections, we compute:
+
+- 50 strike values from `K = 60` to `K = 140`
+- 50 maturities from `T = 0.1` to `T = 2.0` years
+
+This produces two 3D surfaces:
+- **Call surface:** `C(K, T)`
+- **Put surface:** `P(K, T)`
+
+### Why this matters (link to the earlier work)
+Everything in this plot comes directly from the same Black–Scholes model we used as the benchmark for:
+- Monte Carlo price convergence (`MC → BS`)
+- Antithetic variance reduction
+- Delta convergence (`MC Delta → BS Delta`)
+
+The surface makes the pricing function intuitive: you can *see* how option value changes as you move through market conditions (different strikes and time to expiry), rather than checking one parameter set at a time.
+
+### What you should observe
+- **Calls decrease as strike increases** (harder to finish in-the-money).
+- **Puts increase as strike increases** (more protection value).
+- **Both calls and puts generally increase with maturity** (more time for the stock to move into a favourable region).
+- Far in/out-of-the-money regions flatten toward intrinsic-value-like behaviour.
+
+### Geometric interpretation of call–put parity
+Call–put parity is the no-arbitrage identity we used to verify our Black–Scholes implementation:
+
+![parity](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}C-P=S_0e^{-qT}-Ke^{-rT})
+
+Geometrically, this says the **vertical gap** between the call surface and put surface at the same `(K, T)` is *not arbitrary* — it is pinned down by the discounted stock and discounted strike terms. In other words, for every point on the grid:
+
+- If you subtract the put surface from the call surface, the result must match a deterministic surface driven by `S0`, `r`, `q`, `K`, and `T`.
+- This is why parity is such a strong correctness check: it constrains the relationship between the two surfaces everywhere, not just at a single input.
+
