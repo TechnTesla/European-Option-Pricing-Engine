@@ -321,4 +321,40 @@ Geometrically, parity says the **vertical gap** between the call surface and put
 
 So parity is more than a single-number check: it constrains the relationship between the two surfaces **everywhere** on the grid.
 
-> Note: the parity equation is forced to white (`\color{White}`), so it is best viewed in dark mode.
+## Assumptions & Limitations (and what they mean)
+
+This project is built to demonstrate a complete **European option pricing workflow** under the classical Black–Scholes/GBM framework:
+- use **Black–Scholes** as an analytical benchmark (“true price” *under the model*),
+- show **Monte Carlo** converges to that benchmark at the theoretical `O(N^(-1/2))` rate,
+- reduce estimator variance with **antithetic variates**,
+- and validate **risk (Delta)** by showing MC Delta converges to the Black–Scholes Delta.
+
+Because Black–Scholes is the benchmark throughout, the project inherits the key assumptions of that model.
+
+### Core model assumptions
+- **Constant volatility (`sigma` is fixed):**  
+  **Meaning:** the model assumes the underlying’s volatility does not change with time or strike.  
+  **Why it matters:** real markets exhibit a *volatility smile/surface* (implied vol varies across strikes and maturities) and volatility changes through time (clustering). A single constant `sigma` cannot match the full surface, so Black–Scholes will misprice options away from the calibration point (especially deep OTM puts/calls) and Greeks won’t reflect smile dynamics.
+
+- **GBM / lognormal returns (continuous paths, no jumps):**  
+  **Meaning:** the stock is modelled with continuous Brownian motion dynamics.  
+  **Why it matters:** real prices can gap on news/earnings and have fat tails. GBM typically understates extreme moves, which can materially affect option values and tail-risk.
+
+- **Constant rates (`r`) and dividend yield (`q`):**  
+  **Meaning:** discounting and carry are treated as constant over the option life.  
+  **Why it matters:** in reality rates have term structure and can move; dividends may be discrete/uncertain. This mainly impacts longer-dated options and carry-sensitive pricing.
+
+- **Frictionless markets (derivation idealisation):**  
+  **Meaning:** the theory assumes no transaction costs and continuous hedging is possible.  
+  **Why it matters:** real hedging is discrete and costly; with jumps and costs, “perfect replication” breaks, so the model is an approximation.
+
+### Product scope limitations
+- **European options only:** no early exercise logic (so not directly applicable to American options).
+- **Not calibrated to market data:** the 3D surface is the Black–Scholes surface over `(K, T)` at fixed `(S0, r, q, sigma)`, not a market-implied volatility surface.
+
+### Numerical limitations (Monte Carlo + Greeks)
+- **Monte Carlo converges slowly:** error scales like `1/sqrt(N)`, so 10× less error needs ~100× more simulations.
+- **95% CI is approximate:** using `estimate ± 1.96 * SE` relies on large-sample normality; for small `N` and skewed payoffs it’s an approximation.
+- **Finite-difference Delta depends on bump size `h`:** large `h` introduces bias; tiny `h` increases noise and numerical cancellation. The estimate is still valid, but accuracy depends on choosing `h` sensibly relative to `S0` and `N`.
+
+In short: the engine is **correct and internally consistent under the Black–Scholes/GBM assumptions**, and the experiments (price convergence, variance reduction, delta convergence) validate the expected numerical behaviour. The limitations are primarily about realism versus what actual option markets exhibit (smile, jumps, time-varying parameters).
