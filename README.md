@@ -73,96 +73,81 @@ Running with parameters S₀=100, K=100, r=0.05, σ=0.20, T=1.0, q=0.0:
 
 ## Black–Scholes (Analytical) Pricer — Math Behind the Formula
 
-This project includes a **closed-form** Black–Scholes calculator for European calls and puts. The formula is not “assumed”; it is derived from:
+This project includes a **closed-form** Black–Scholes calculator for European calls and puts. The formula is derived from:
 
-1) **Geometric Brownian Motion (GBM)** for the underlying  
-2) **Itô’s Lemma** to get the option’s stochastic dynamics  
-3) **No-arbitrage / delta-hedging** to eliminate risk  
-4) The resulting **Black–Scholes PDE**, solved to obtain a closed-form price  
-5) **Call–put parity** as a verification check
+1) **GBM** for the underlying  
+2) **Itô’s Lemma** to obtain option dynamics  
+3) **No-arbitrage / delta-hedging** to remove risk  
+4) The resulting **Black–Scholes PDE**, solved in closed form  
+5) **Call–put parity** as a verification check  
 
 ---
 
 ### 1) Stock model (GBM)
-We assume the stock price follows GBM:
 
-\[
-dS_t = \mu S_t\,dt + \sigma S_t\,dW_t
-\]
+![GBM](https://latex.codecogs.com/svg.latex?\dpi{120}dS_t=\mu%20S_t\,dt+\sigma%20S_t\,dW_t)
 
-- \(S_t\): stock price  
-- \(\mu\): real-world drift  
-- \(\sigma\): volatility  
-- \(W_t\): Brownian motion  
+Where:
+- `S_t` is the stock price
+- `μ` is drift (real-world)
+- `σ` is volatility
+- `W_t` is Brownian motion
 
 ---
 
 ### 2) Itô’s Lemma (option dynamics)
-Let the option value be \(V(S,t)\). Applying Itô’s Lemma:
 
-\[
-dV = \Big(\frac{\partial V}{\partial t} + \mu S\frac{\partial V}{\partial S} + \frac{1}{2}\sigma^2 S^2 \frac{\partial^2 V}{\partial S^2}\Big)dt
-+ \sigma S\frac{\partial V}{\partial S}\,dW
-\]
+Let the option value be `V(S,t)`. Applying Itô’s Lemma:
 
-This separates the option change into:
-- a deterministic \(dt\) term, and
-- a random \(dW\) term.
+![Ito](https://latex.codecogs.com/svg.latex?\dpi{120}dV=\Big(\frac{\partial%20V}{\partial%20t}+\mu%20S\frac{\partial%20V}{\partial%20S}+\frac{1}{2}\sigma^2S^2\frac{\partial^2%20V}{\partial%20S^2}\Big)\,dt+\sigma%20S\frac{\partial%20V}{\partial%20S}\,dW)
+
+This splits `dV` into a deterministic `dt` part and a random `dW` part.
 
 ---
 
 ### 3) Delta-hedging + no-arbitrage ⇒ Black–Scholes PDE
-Form a hedged portfolio \(\Pi = V - \Delta S\) with \(\Delta = \partial V/\partial S\).  
-This choice cancels the stochastic term, making \(\Pi\) locally riskless.
 
-A riskless portfolio must earn the risk-free rate. With continuous dividend yield \(q\), the no-arbitrage condition yields the **Black–Scholes PDE**:
+Choose the hedge ratio:
 
-\[
-\frac{\partial V}{\partial t}
-+ (r-q)S\frac{\partial V}{\partial S}
-+ \frac{1}{2}\sigma^2 S^2\frac{\partial^2 V}{\partial S^2}
-- rV = 0
-\]
+![Delta](https://latex.codecogs.com/svg.latex?\dpi{120}\Delta=\frac{\partial%20V}{\partial%20S})
 
-Boundary conditions at expiry \(t=T\):
-- Call payoff: \(\;V(S,T)=\max(S-K,0)\)
-- Put payoff:  \(\;V(S,T)=\max(K-S,0)\)
+Form a hedged portfolio `Π = V − ΔS` to cancel the `dW` term.  
+A riskless portfolio must earn the risk-free rate `r`. With continuous dividend yield `q`, no-arbitrage implies the **Black–Scholes PDE**:
+
+![PDE](https://latex.codecogs.com/svg.latex?\dpi{120}\frac{\partial%20V}{\partial%20t}+(r-q)S\frac{\partial%20V}{\partial%20S}+\frac{1}{2}\sigma^2S^2\frac{\partial^2%20V}{\partial%20S^2}-rV=0)
+
+Expiry boundary conditions:
+- Call: `V(S,T) = max(S − K, 0)`
+- Put:  `V(S,T) = max(K − S, 0)`
 
 ---
 
 ### 4) Closed-form Black–Scholes solution
-Solving the PDE gives the Black–Scholes closed-form prices.
 
 Define:
 
-\[
-d_1 = \frac{\ln(S_0/K) + (r-q+\frac{1}{2}\sigma^2)T}{\sigma\sqrt{T}},
-\qquad
-d_2 = d_1 - \sigma\sqrt{T}
-\]
+![d1](https://latex.codecogs.com/svg.latex?\dpi{120}d_1=\frac{\ln(S_0/K)+(r-q+\frac{1}{2}\sigma^2)T}{\sigma\sqrt{T}})
+  
+![d2](https://latex.codecogs.com/svg.latex?\dpi{120}d_2=d_1-\sigma\sqrt{T})
 
-Let \(N(\cdot)\) be the standard normal CDF.
+Let `N(.)` be the standard normal CDF.
 
-**Call:**
-\[
-C = S_0 e^{-qT}N(d_1) - Ke^{-rT}N(d_2)
-\]
+Call:
 
-**Put:**
-\[
-P = Ke^{-rT}N(-d_2) - S_0 e^{-qT}N(-d_1)
-\]
+![Call](https://latex.codecogs.com/svg.latex?\dpi{120}C=S_0e^{-qT}N(d_1)-Ke^{-rT}N(d_2))
 
-This is what the `black_scholes.py` module implements.
+Put:
+
+![Put](https://latex.codecogs.com/svg.latex?\dpi{120}P=Ke^{-rT}N(-d_2)-S_0e^{-qT}N(-d_1))
+
+This is what `black_scholes.py` implements.
 
 ---
 
 ### 5) Verification via call–put parity
-A key consistency check is **call–put parity** (European options):
 
-\[
-C - P = S_0 e^{-qT} - Ke^{-rT}
-\]
+For European options:
 
-In this repo, parity is used to verify that the call and put implementations are internally consistent for the same \((S_0, K, r, q, \sigma, T)\).
+![Parity](https://latex.codecogs.com/svg.latex?\dpi{120}C-P=S_0e^{-qT}-Ke^{-rT})
 
+Parity is a quick check that the call and put implementations are internally consistent for the same inputs.
