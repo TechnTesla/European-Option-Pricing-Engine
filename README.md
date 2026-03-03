@@ -154,43 +154,36 @@ This function returns `(price, std_error, confidence_interval)`.
 
 ## Variance Reduction: Antithetic Variates
 
-Plain Monte Carlo uses independent random draws \(Z \sim \mathcal{N}(0,1)\) to simulate terminal prices \(S_T\). The estimate is unbiased, but it can have high variance. **Antithetic variates** reduce this variance by pairing each random draw \(Z\) with its mirror \(-Z\), then averaging the two resulting payoffs.
+Standard Monte Carlo uses independent random draws `Z ~ N(0,1)` to simulate terminal prices and compute payoffs. The estimator is unbiased, but it can be noisy. **Antithetic variates** reduce this noise by pairing each draw `Z` with its mirror `-Z`, then averaging the two payoffs.
 
 ### Idea (what it is)
-For each simulation we generate a normal shock \(Z\) and compute two terminal prices:
+For each pair, we simulate two terminal prices using `Z` and `-Z`:
 
 ![STpm](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}S_T^{(+)}=S_0\exp\Big((r-q-\tfrac12\sigma^2)T+\sigma\sqrt{T}\,Z\Big),\quad
 S_T^{(-)}=S_0\exp\Big((r-q-\tfrac12\sigma^2)T-\sigma\sqrt{T}\,Z\Big))
 
-We then compute the corresponding payoffs and **average them**:
+We compute the two payoffs and then take their average:
+- Call: `0.5 * (max(ST_pos - K, 0) + max(ST_neg - K, 0))`
+- Put:  `0.5 * (max(K - ST_pos, 0) + max(K - ST_neg, 0))`
 
-- Call: \(\;\frac{1}{2}\big(\max(S_T^{(+)}-K,0)+\max(S_T^{(-)}-K,0)\big)\)
-- Put:  \(\;\frac{1}{2}\big(\max(K-S_T^{(+)},0)+\max(K-S_T^{(-)},0)\big)\)
-
-This keeps the estimator **unbiased**, but typically lowers its variance.
+This keeps the estimate unbiased, but typically lowers variance.
 
 ### Why variance goes down
-The key is **negative correlation**: when \(Z\) is large and positive, \(-Z\) is equally large and negative. For vanilla calls/puts, the payoff from \(Z\) tends to be high when the payoff from \(-Z\) tends to be low, so averaging them cancels some randomness.
+The payoff from `Z` and the payoff from `-Z` tend to move in opposite directions (negative correlation). Averaging two negatively correlated samples cancels part of the randomness.
 
-Mathematically, for the averaged payoff \(\bar{Y}=\frac{Y^{(+)}+Y^{(-)}}{2}\),
+![varavg](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{Var}(\bar{Y})=\frac{1}{2}\mathrm{Var}(Y)\,(1+\rho))
 
-![varavg](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{Var}(\bar{Y})=\frac{1}{4}\Big(\mathrm{Var}(Y^{(+)})+\mathrm{Var}(Y^{(-)})+2\,\mathrm{Cov}(Y^{(+)},Y^{(-)})\Big))
-
-Since \(Y^{(+)}\) and \(Y^{(-)}\) have the same variance, this simplifies to:
-
-![varavg2](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{Var}(\bar{Y})=\frac{1}{2}\mathrm{Var}(Y)\big(1+\rho\big))
-
-where \(\rho\) is the correlation between the paired payoffs. For antithetic variates we often get \(\rho < 0\), which makes \(1+\rho\) smaller, hence lower variance.
+Here, `rho` is the correlation between the paired payoffs. When `rho < 0`, the factor `(1 + rho)` is smaller, so the variance is lower.
 
 ### Variance Reduction Factor (VRF)
-We report the **variance reduction factor** as:
+We report the **variance reduction factor**:
 
 ![vrf](https://latex.codecogs.com/svg.latex?\dpi{140}\color{White}\mathrm{VRF}=\frac{\mathrm{Var}(\mathrm{standard}\%20\mathrm{MC}\%20\mathrm{estimator})}{\mathrm{Var}(\mathrm{antithetic}\%20\mathrm{estimator})})
 
 Interpretation:
-- `VRF > 1` means antithetic variates reduced variance (good).
-- `VRF = 2` means you achieved the same accuracy with **half** the variance (or equivalently need about half as many simulations for the same error).
-- A 33% lower standard error corresponds to about `(1/0.67)^2 ≈ 2.2×` variance reduction (rule of thumb: variance scales like SE²).
+- `VRF > 1` means antithetic variates reduced variance.
+- `VRF = 2` means half the variance (or roughly half as many simulations needed for the same accuracy).
+- If standard error drops by ~33%, variance drops by about `(1/0.67)^2 ≈ 2.2x` (since variance scales like SE^2).
 
 ### Function inputs / behaviour
 `var_reduction(S0, K, r, q, sigma, T, N, option_type, seed=1)`
@@ -200,7 +193,6 @@ Implementation details:
 - Uses both `Z` and `-Z` to create two terminal price arrays
 - Averages paired payoffs, discounts by `exp(-rT)`, and returns `(price, std_error, confidence_interval)`
 - Same compute budget as standard MC (one pair uses two terminal prices, but replaces two independent draws with a correlated pair)
-
 ## Convergence Plot (MC → Black–Scholes)
 
 ![convergence](results/plots/convergence.png)
