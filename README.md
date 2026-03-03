@@ -316,7 +316,6 @@ From the plotted surfaces:
 - **Call prices decrease as `K` increases** (harder to finish in-the-money).
 - **Put prices increase as `K` increases** (more downside protection value).
 - **Both surfaces generally rise with `T`** (more time for favourable moves).
-- In deep ITM/OTM regions the surfaces flatten toward intrinsic-value-like behaviour.
 
 ### Geometric interpretation of call–put parity
 Call–put parity is the no-arbitrage identity used earlier to verify the Black–Scholes implementation:
