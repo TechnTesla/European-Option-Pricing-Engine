@@ -19,6 +19,9 @@ This project builds a complete European option pricing engine from first princip
 - **Option Greeks** computed analytically (BS) and numerically (finite differences on MC)
 - **3D pricing surface** visualising call and put prices across all strikes and maturities
 
+---
+> This is my first quantitative finance project, built from scratch with no prior Python or finance experience.
+
 ## Project Structure
 ```
 European-Option-Pricing-Engine/
@@ -68,8 +71,6 @@ Running with parameters S₀=100, K=100, r=0.05, σ=0.20, T=1.0, q=0.0:
 
 
 
----
-> This is my first quantitative finance project, built from scratch with no prior Python or finance experience.
 ## Black–Scholes (Analytical) Pricer — Math Behind the Formula
 
 This project includes a **closed-form** Black–Scholes calculator for European calls and puts. The formula is not “assumed”; it is derived from:
